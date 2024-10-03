@@ -15,3 +15,4 @@ public interface ITelemetryService
     /// <param name="success">If the function executed successfully</param>
     void TrackPluginFunction(string pluginName, string functionName, bool success);
 }
+// TEST 
