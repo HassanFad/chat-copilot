@@ -155,3 +155,43 @@ If you want to serve a production build of the `webapp` (as static files) withou
     - Local:    http://localhost:3000
     - Network:  http://192.168.0.100:3000
     ```
+
+## Purpose of the Frontend Web Application
+
+The purpose of the frontend web application is to provide a user-friendly interface for interacting with the Chat Copilot. It allows users to chat with the AI, view responses, and utilize various features and plugins.
+
+## Setup and Configuration Instructions
+
+1. Ensure that you have the required dependencies installed, such as Node.js and Yarn.
+2. Clone this repository and navigate to the `webapp` directory.
+3. Install the dependencies using the following command:
+
+```bash
+yarn install
+```
+
+4. Configure the `.env` file with the necessary settings for your environment, such as API endpoints and any other required configurations.
+5. Run the frontend web application using the following command:
+
+```bash
+yarn start
+```
+
+## Usage Instructions
+
+1. Open your web browser and navigate to `http://localhost:3000`.
+2. Interact with the Chat Copilot using the chat interface.
+3. Use the various features and components of the Chat Copilot as described in the [Main Features and Components](../README.md#main-features-and-components) section.
+
+## Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Frontend Web Application! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](../CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)

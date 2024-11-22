@@ -1,4 +1,4 @@
-﻿# Copilot Chat Import Document App
+# Copilot Chat Import Document App
 
 > **!IMPORTANT**
 > This sample is for educational purposes only and is not recommended for production deployments.
@@ -10,8 +10,13 @@ relevant information from memories to provide more meaningful answers to users t
 Memories can be generated from conversations as well as imported from external sources, such as documents.
 Importing documents enables Chat Copilot to have up-to-date knowledge of specific contexts, such as enterprise and personal data.
 
+## Purpose of the Import Document App
 
-## Running the app against a local Chat Copilot instance
+The purpose of the import document app is to allow users to import documents into the Chat Copilot's document memory store. This enables the Chat Copilot to have up-to-date knowledge of specific contexts, such as enterprise and personal data, and provide more meaningful answers to users throughout the conversations.
+
+## Setup and Configuration Instructions
+
+### Running the app against a local Chat Copilot instance
 
 1. Ensure the web api is running at `https://localhost:40443/`.
 2. Configure the appsettings.json file under this folder root with the following variables:
@@ -50,10 +55,9 @@ Importing documents enables Chat Copilot to have up-to-date knowledge of specifi
 
    ![Document-Memory-Sample-2](https://github.com/microsoft/chat-copilot/assets/52973358/f0e95104-72ca-4a0a-9555-ee335d8df696)
 
+### Running the app against a deployed Chat Copilot instance
 
-## Running the app against a deployed Chat Copilot instance
-
-### Configure your environment
+#### Configure your environment
 
 1. Create a registered app in Azure Portal (https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app).
 
@@ -88,7 +92,7 @@ Importing documents enables Chat Copilot to have up-to-date knowledge of specifi
    - `Instance` is the Azure AD cloud instance to authenticate users against. For most users, this is `https://login.microsoftonline.com`.
    - `Scopes` should be set to "access_as_user"
 
-### Run the app
+## Usage Instructions
 
 1. Change directory to this folder root.
 2. **Run** the following command to import a document to the app under the global document collection where
@@ -110,3 +114,16 @@ Importing documents enables Chat Copilot to have up-to-date knowledge of specifi
    To import multiple files, specify multiple files. For example:
 
    `dotnet run --files .\sample-docs\ms10k.txt .\sample-docs\Microsoft-Responsible-AI-Standard-v2-General-Requirements.pdf`
+
+## Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Import Document App! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)

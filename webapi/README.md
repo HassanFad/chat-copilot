@@ -373,3 +373,43 @@ internal static IServiceCollection AddPlannerServices(this IServiceCollection se
 }
 
 ```
+
+## Purpose of the Backend Web API Service
+
+The purpose of the backend web API service is to handle the backend logic and communication with the AI services for the Chat Copilot. It provides endpoints for various functionalities such as chat interactions, memory processing, and plugin management.
+
+## Setup and Configuration Instructions
+
+1. Ensure that you have the required dependencies installed, such as .NET SDK and any other prerequisites mentioned in the [main instructions](../README.md#instructions).
+2. Clone this repository and navigate to the `webapi` directory.
+3. Configure the `appsettings.json` file with the necessary settings for your environment, such as AI service keys, endpoints, and any other required configurations.
+4. Build the project using the following command:
+
+```bash
+dotnet build
+```
+
+5. Run the backend web API service using the following command:
+
+```bash
+dotnet run
+```
+
+## Usage Instructions
+
+1. Ensure that the backend web API service is running.
+2. Use the provided endpoints to interact with the Chat Copilot's backend functionalities, such as chat interactions, memory processing, and plugin management.
+3. Refer to the [main instructions](../README.md#instructions) for more details on how to use the Chat Copilot application.
+
+## Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Backend Web API Service! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)

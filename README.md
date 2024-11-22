@@ -392,3 +392,190 @@ with any additional questions or comments.
 Copyright (c) Microsoft Corporation. All rights reserved.
 
 Licensed under the [MIT](LICENSE) license.
+
+# Project Structure and Purpose
+
+The Chat Copilot project is structured into several components, each serving a specific purpose:
+
+1. **Frontend Application**: A React web app located in the `webapp` directory. It provides the user interface for interacting with the Chat Copilot.
+2. **Backend REST API**: A .NET web API service located in the `webapi` directory. It handles the backend logic and communication with the AI services.
+3. **Memory Pipeline**: A .NET worker service located in the `memorypipeline` directory. It processes semantic memory for the Chat Copilot.
+4. **Integration Tests**: Located in the `integration-tests` directory, these tests ensure the integration of various components of the Chat Copilot.
+5. **Plugins**: Located in the `plugins` directory, this component provides additional functionalities to the Chat Copilot.
+6. **Tools**: Located in the `tools/importdocument` directory, this component provides tools for importing documents into the Chat Copilot.
+7. **Deployment Scripts**: Located in the `scripts/deploy` directory, these scripts help in deploying the Chat Copilot to Azure.
+8. **Setup Scripts**: Located in the `scripts` directory, these scripts help in setting up the Chat Copilot for local deployment.
+
+# Main Features and Components
+
+The Chat Copilot project includes the following main features and components:
+
+1. **Chat Interface**: A user-friendly chat interface for interacting with the Chat Copilot.
+2. **AI Integration**: Integration with Azure OpenAI or OpenAI services for generating responses and processing semantic memory.
+3. **Memory Pipeline**: A pipeline for processing and storing semantic memory, enabling the Chat Copilot to provide more meaningful answers.
+4. **Plugins**: Additional functionalities that can be added to the Chat Copilot, such as web search capabilities.
+5. **Document Import**: Tools for importing documents into the Chat Copilot, allowing it to have up-to-date knowledge of specific contexts.
+6. **Integration Tests**: Tests to ensure the proper integration of various components of the Chat Copilot.
+7. **Deployment Scripts**: Scripts for deploying the Chat Copilot to Azure.
+8. **Setup Scripts**: Scripts for setting up the Chat Copilot for local deployment.
+
+# Setup and Installation Instructions
+
+## Windows
+
+1. Open PowerShell as an administrator.
+   > NOTE: Ensure that you have [PowerShell Core 6+](https://github.com/PowerShell/PowerShell) installed. This is different from the default PowerShell installed on Windows.
+1. Clone this repository
+   ```powershell
+   git clone https://github.com/microsoft/chat-copilot
+   ```
+1. Setup your environment.
+
+   The following is a script to help you install the dependencies required. Feel free to install `dotnet`, `nodejs`, and `yarn` with your method of choice or use this script.
+
+   ```powershell
+   cd <path to chat-copilot>\scripts\
+   .\Install.ps1
+   ```
+
+   > NOTE: This script will install `Chocolatey`, `dotnet-7.0-sdk`, `nodejs`, and `yarn`.
+
+   > NOTE: If you receive an error that the script is not digitally signed or cannot execute on the system, you may need to [change the execution policy](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.3#change-the-execution-policy) (see list of [policies](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.3#powershell-execution-policies) and [scopes](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.3#execution-policy-scope)) or [unblock the script](https://learn.microsoft.com/powershell/module/microsoft.powershell.security/get-executionpolicy?view=powershell-7.3#example-4-unblock-a-script-to-run-it-without-changing-the-execution-policy).
+
+1. Configure Chat Copilot.
+
+   ```powershell
+   .\Configure.ps1 -AIService {AI_SERVICE} -APIKey {API_KEY} -Endpoint {AZURE_OPENAI_ENDPOINT}
+   ```
+
+   - `AI_SERVICE`: `AzureOpenAI` or `OpenAI`.
+   - `API_KEY`: The `API key` for Azure OpenAI or for OpenAI.
+   - `AZURE_OPENAI_ENDPOINT`: The Azure OpenAI resource `Endpoint` address. This is only required when using Azure OpenAI, omit `-Endpoint` if using OpenAI.
+
+   - > **IMPORTANT:** For `AzureOpenAI`, if you deployed models `gpt-35-turbo` and `text-embedding-ada-002` with custom names (instead of the default names), also use the parameters:
+
+     ```powershell
+     -CompletionModel {DEPLOYMENT_NAME} -EmbeddingModel {DEPLOYMENT_NAME} -PlannerModel {DEPLOYMENT_NAME}
+     ```
+
+     > -PlannerModel name will be the same as -CompletionModel
+
+     Open the `.\Configure.ps1` script to see all of the available parameters.
+
+1. Run Chat Copilot locally. This step starts both the backend API and frontend application.
+
+   ```powershell
+   .\Start.ps1
+   ```
+
+   It may take a few minutes for Yarn packages to install on the first run.
+
+   > NOTE: Confirm pop-ups are not blocked and you are logged in with the same account used to register the application.
+
+   - (Optional) To start ONLY the backend:
+
+     ```powershell
+     .\Start-Backend.ps1
+     ```
+
+## Linux/macOS
+
+1. Open Bash as an Administrator.
+1. Clone this repository
+   ```bash
+   git clone https://github.com/microsoft/chat-copilot
+   ```
+1. Configure environment.
+
+   The following is a script to help you install the dependencies required. Feel free to install `dotnet`, `nodejs`, and `yarn` with your method of choice or use this script.
+
+   ```bash
+   cd <path to chat-copilot>/scripts/
+   ```
+
+   **Ubuntu/Debian Linux**
+
+   ```bash
+   ./install-apt.sh
+   ```
+
+   > NOTE: This script uses `apt` to install `dotnet-sdk-7.0`, `nodejs`, and `yarn`.
+
+   **macOS**
+
+   ```bash
+   ./install-brew.sh
+   ```
+
+   > NOTE: This script uses `homebrew` to install `dotnet-sdk`, `nodejs`, and `yarn`.
+
+1. Configure Chat Copilot.
+
+   1. For OpenAI
+
+      ```bash
+      ./configure.sh --aiservice OpenAI --apikey {API_KEY}
+      ```
+
+      - `API_KEY`: The `API key` for OpenAI.
+
+   2. For Azure OpenAI
+
+      ```bash
+      ./configure.sh --aiservice AzureOpenAI \
+                     --endpoint {AZURE_OPENAI_ENDPOINT} \
+                     --apikey   {API_KEY}
+      ```
+
+      - `AZURE_OPENAI_ENDPOINT`: The Azure OpenAI resource `Endpoint` address.
+      - `API_KEY`: The `API key` for Azure OpenAI.
+
+      **IMPORTANT:** If you deployed models `gpt-35-turbo` and `text-embedding-ada-002`
+      with custom names (instead of the default names), you need to specify
+      the deployment names with three additional parameters:
+
+      ```bash
+      ./configure.sh --aiservice AzureOpenAI \
+                     --endpoint        {AZURE_OPENAI_ENDPOINT} \
+                     --apikey          {API_KEY} \
+                     --completionmodel {DEPLOYMENT_NAME} \
+                     --plannermodel    {DEPLOYMENT_NAME} \
+                     --embeddingmodel  {DEPLOYMENT_NAME}
+      ```
+
+      `--plannermodel` will be the same name as `--completionmodel`
+
+1. Run Chat Copilot locally. This step starts both the backend API and frontend application.
+
+   ```bash
+   ./start.sh
+   ```
+
+   It may take a few minutes for Yarn packages to install on the first run.
+
+   > NOTE: Confirm pop-ups are not blocked and you are logged in with the same account used to register the application.
+
+   - (Optional) To start ONLY the backend:
+
+     ```powershell
+     ./start-backend.sh
+     ```
+
+# Usage Instructions
+
+1. Open your web browser and navigate to `http://localhost:3000`.
+2. Interact with the Chat Copilot using the chat interface.
+3. Use the various features and components of the Chat Copilot as described in the [Main Features and Components](#main-features-and-components) section.
+
+# Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Sample App! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)

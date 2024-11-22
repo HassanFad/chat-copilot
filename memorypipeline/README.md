@@ -106,3 +106,36 @@ qdrant/qdrant
 docker container stop [name]
 docker container rm [name]
 ```
+
+## Purpose of the Memory Pipeline
+
+The purpose of the memory pipeline is to process and store semantic memory for the Chat Copilot. It enables the Chat Copilot to provide more meaningful answers by leveraging contextual information from conversations and external sources, such as documents.
+
+## Setup and Configuration Instructions
+
+1. Ensure that the Chat Copilot's backend web API is running.
+2. Configure the memory pipeline by following the instructions in the [Configuration](#configuration) section above.
+3. Run the memory pipeline using the following command:
+
+```bash
+dotnet run
+```
+
+## Usage Instructions
+
+1. Ensure that the Chat Copilot's backend web API and memory pipeline are running.
+2. Interact with the Chat Copilot using the chat interface.
+3. The memory pipeline will process and store semantic memory in the background, enabling the Chat Copilot to provide more meaningful answers.
+
+## Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Memory Pipeline! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)
