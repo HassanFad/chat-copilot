@@ -230,3 +230,37 @@ eval WEB_API_NAME=$(az deployment group show --name $DEPLOYMENT_NAME --resource-
 
 az webapp cors add --name $WEB_API_NAME --resource-group $RESOURCE_GROUP --subscription $SUBSCRIPTION --allowed-origins YOUR_FRONTEND_URL
 ```
+
+# Purpose of the Deployment Scripts
+
+The purpose of the deployment scripts is to automate the process of deploying the Chat Copilot application and its required resources to Azure. These scripts help streamline the deployment process and ensure that all necessary components are properly configured and deployed.
+
+# Setup and Configuration Instructions
+
+1. Ensure that you have the required dependencies installed, such as Azure CLI and any other prerequisites mentioned in the [Configure your environment](#configure-your-environment) section.
+2. Clone this repository and navigate to the `scripts/deploy` directory.
+3. Configure the necessary parameters for the deployment scripts, such as subscription ID, deployment name, AI service type, API key, endpoint, client IDs, and tenant ID.
+4. Run the appropriate deployment script based on your operating system (PowerShell or Bash) to deploy the Azure infrastructure, application, hosted plugins, and memory pipeline as needed.
+
+# Usage Instructions
+
+1. Follow the setup and configuration instructions to prepare your environment and configure the necessary parameters.
+2. Run the deployment scripts in the following order:
+   - Deploy Azure Infrastructure
+   - Deploy Application
+   - Deploy Hosted Plugins (if applicable)
+   - Deploy Memory Pipeline (if applicable)
+3. Verify the deployment by accessing the deployed Chat Copilot application and ensuring that all components are functioning as expected.
+
+# Contribution Guidelines
+
+We welcome your contributions and suggestions to the Chat Copilot Deployment Scripts! One of the easiest
+ways to participate is to engage in discussions in the GitHub repository.
+Bug reports and fixes are welcome!
+
+To learn more and get started:
+
+- Read the [documentation](https://learn.microsoft.com/semantic-kernel/chat-copilot/)
+- Join the [Discord community](https://aka.ms/SKDiscord)
+- [Contribute](CONTRIBUTING.md) to the project
+- Follow the team on our [blog](https://aka.ms/sk/blog)
