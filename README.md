@@ -392,3 +392,38 @@ with any additional questions or comments.
 Copyright (c) Microsoft Corporation. All rights reserved.
 
 Licensed under the [MIT](LICENSE) license.
+
+# Docker Folder
+
+The `docker` folder contains the necessary files to build and run the various services required for Chat Copilot. Below is a description of the content and purpose of the `docker` folder and its subdirectories:
+
+## docker-compose.yaml
+
+The `docker-compose.yaml` file contains the configuration for various services including:
+
+- `chat-copilot-webapp-nginx`
+- `chat-copilot-webapi`
+- `qdrant`
+- `rabbitmq`
+- `web-searcher`
+- `chat-copilot-memorypipeline`
+
+## memorypipeline
+
+- `.env.example`: Provides example environment variables for Azure OpenAI embedding and text settings, and Azure blob settings.
+- `Dockerfile`: Defines the build process for the `chat-copilot-memorypipeline` image using .NET SDK and ASP.NET images.
+
+## plugins/web-searcher
+
+- `.env.example`: Provides an example environment variable for the Bing API key.
+- `Dockerfile`: Defines the build process for the `web-searcher` image using .NET SDK and Azure Functions images.
+
+## webapi
+
+- `.env.example`: Provides example environment variables for backend authentication, Azure speech settings, Azure OpenAI embedding and text settings, and Azure blobs settings.
+- `Dockerfile`: Defines the build process for the `chat-copilot-webapi` image using .NET SDK and ASP.NET images.
+
+## webapp
+
+- `Dockerfile`: Defines the build process for the `chat-copilot-webapp` image using Node.js.
+- `Dockerfile.nginx`: Defines the build process for the `chat-copilot-webapp-nginx` image using Node.js and Nginx.
