@@ -7,5 +7,8 @@ namespace CopilotChat.WebApi.Auth;
 /// </summary>
 public static class AuthPolicyName
 {
+    /// <summary>
+    /// Policy name for requiring chat participant authorization.
+    /// </summary>
     public const string RequireChatParticipant = "RequireChatParticipant";
 }

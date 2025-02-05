@@ -9,4 +9,5 @@ namespace CopilotChat.WebApi.Auth;
 /// </summary>
 public class ChatParticipantRequirement : IAuthorizationRequirement
 {
+    // This class is intentionally left empty as it serves as a marker for the authorization requirement.
 }

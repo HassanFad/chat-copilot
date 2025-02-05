@@ -2,6 +2,9 @@
 
 namespace CopilotChat.WebApi.Auth;
 
+/// <summary>
+/// Interface defining the contract for obtaining authenticated user information.
+/// </summary>
 public interface IAuthInfo
 {
     /// <summary>

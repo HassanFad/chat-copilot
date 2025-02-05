@@ -18,8 +18,11 @@ public class ChatParticipantAuthorizationHandler : AuthorizationHandler<ChatPart
     private readonly ChatParticipantRepository _chatParticipantRepository;
 
     /// <summary>
-    /// Constructor
+    /// Constructor for ChatParticipantAuthorizationHandler.
     /// </summary>
+    /// <param name="authInfo">The authenticated user information.</param>
+    /// <param name="chatSessionRepository">The chat session repository.</param>
+    /// <param name="chatParticipantRepository">The chat participant repository.</param>
     public ChatParticipantAuthorizationHandler(
         IAuthInfo authInfo,
         ChatSessionRepository chatSessionRepository,
@@ -30,6 +33,13 @@ public class ChatParticipantAuthorizationHandler : AuthorizationHandler<ChatPart
         this._chatParticipantRepository = chatParticipantRepository;
     }
 
+    /// <summary>
+    /// Handles the requirement to check if the user has access to the chat.
+    /// </summary>
+    /// <param name="context">The authorization handler context.</param>
+    /// <param name="requirement">The chat participant requirement.</param>
+    /// <param name="resource">The HTTP context resource.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         ChatParticipantRequirement requirement,
