@@ -18,6 +18,10 @@ public class AuthInfo : IAuthInfo
 
     private readonly Lazy<AuthData> _data;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthInfo"/> class.
+    /// </summary>
+    /// <param name="httpContextAccessor">The HTTP context accessor to retrieve user information.</param>
     public AuthInfo(IHttpContextAccessor httpContextAccessor)
     {
         this._data = new Lazy<AuthData>(() =>

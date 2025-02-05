@@ -30,6 +30,10 @@ public class PassThroughAuthenticationHandler : AuthenticationHandler<Authentica
     {
     }
 
+    /// <summary>
+    /// Handles the authentication process by allowing all requests to pass through.
+    /// </summary>
+    /// <returns>An authentication result indicating success.</returns>
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         this.Logger.LogInformation("Allowing request to pass through");
