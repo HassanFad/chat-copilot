@@ -373,3 +373,14 @@ internal static IServiceCollection AddPlannerServices(this IServiceCollection se
 }
 
 ```
+
+## Controllers
+
+The `webapi/Controllers` directory contains various controllers that handle different aspects of the Chat Copilot backend web API service.
+
+* Each controller is responsible for a specific functionality, such as managing chat sessions, participants, documents, and plugins.
+* The controllers use dependency injection to access services and repositories, which helps in maintaining a clean and modular architecture.
+* The controllers are decorated with attributes like `[ApiController]`, `[Route]`, and `[Authorize]` to define their behavior and access control.
+* The controllers interact with other components like SignalR hubs, memory clients, and content safety services to provide a comprehensive chat experience.
+* The controllers handle various HTTP methods like GET, POST, PUT, PATCH, and DELETE to perform CRUD operations on chat-related resources.
+* The controllers return appropriate HTTP status codes and responses based on the outcome of the operations, ensuring a consistent and user-friendly API.
