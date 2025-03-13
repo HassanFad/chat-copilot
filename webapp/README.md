@@ -155,3 +155,51 @@ If you want to serve a production build of the `webapp` (as static files) withou
     - Local:    http://localhost:3000
     - Network:  http://192.168.0.100:3000
     ```
+
+## Directory Structure
+
+### `webapp` Directory
+
+The `webapp` directory contains the source code for the Chat Copilot's frontend web application. It includes the following key components:
+
+- `package.json`: Defines the project's dependencies, scripts, and other configurations.
+- `README.md`: Provides instructions on running the Chat Copilot frontend application and configuring HTTPS for local development.
+- `src`: Contains the main source code, including components, hooks, models, services, and styles.
+
+### `webapp/src` Directory
+
+The `webapp/src` directory contains the main source code for the Chat Copilot frontend application. It includes the following key components:
+
+- `components`: Contains various React components for the chat interface, such as `ChatInput`, `ChatRoom`, `ChatList`, and more.
+- `libs`: Contains utility functions, hooks, and services used throughout the application.
+- `redux`: Manages the application's state using Redux.
+- `App.tsx`: Structures the application by defining the main components and their interactions.
+- `index.tsx`: Initializes the application and sets up the Redux store and authentication.
+
+### `webapp/src/components` Directory
+
+The `webapp/src/components` directory includes various React components for the chat interface. Some of the key components are:
+
+- `ChatInput.tsx`: Defines the chat input component.
+- `ChatRoom.tsx`: Defines the chat room component, including chat history and input.
+- `ChatList.tsx`: Defines the chat list component, including filtering and sorting conversations.
+- `ChatWindow.tsx`: Defines the chat window component, including tabs for chat, documents, plans, and persona.
+- `views`: Contains components for different views, such as `ChatView.tsx`, which defines the main chat view, including the chat list and chat window.
+
+### `webapp/src/libs` Directory
+
+The `webapp/src/libs` directory contains utility functions, hooks, and services used throughout the application. Some of the key components are:
+
+- `hooks`: Contains custom hooks, such as `useChat.ts`, which defines the `useChat` hook for managing chat-related functionality.
+- `auth`: Contains helper functions for authentication, such as `AuthHelper.ts`.
+- `models`: Contains TypeScript interfaces and models used throughout the application, such as `ChatMessage.ts`, `ChatSession.ts`, `ChatUser.ts`, `ServiceInfo.ts`, and `TokenUsage.ts`.
+- `services`: Contains services for making API requests, such as `BaseService.ts`, `ChatArchiveService.ts`, `ChatService.ts`, `DocumentImportService.ts`, `GraphService.ts`, `MaintenanceService.ts`, `PluginService.ts`, and `SpeechService.ts`.
+- `semantic-kernel`: Contains models related to the semantic kernel, such as `Ask.ts`, `AskResult.ts`, `CustomPlugin.ts`, and `KeyConfig.ts`.
+- `utils`: Contains utility functions, such as `PlanUtils.ts`.
+
+### `webapp/src/redux` Directory
+
+The `webapp/src/redux` directory manages the application's state using Redux. Some of the key components are:
+
+- `app`: Contains the app slice, including actions and reducers for managing the app state. Key files include `store.ts`, `rootReducer.ts`, `appSlice.ts`, and `AppState.ts`.
+- `features`: Contains slices for different features of the application, such as `conversations`, `message-relay`, `plugins`, and `users`. Key files include `ChatState.ts`, `conversationsSlice.ts`, `ConversationsState.ts`, `signalRHubConnection.ts`, `signalRMiddleware.ts`, `pluginsSlice.ts`, `PluginsState.ts`, `usersSlice.ts`, and `UsersState.ts`.
