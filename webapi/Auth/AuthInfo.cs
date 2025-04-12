@@ -12,12 +12,19 @@ namespace CopilotChat.WebApi.Auth;
 /// </summary>
 public class AuthInfo : IAuthInfo
 {
+    /// <summary>
+    /// Record struct to hold authentication data.
+    /// </summary>
     private record struct AuthData(
         string UserId,
         string UserName);
 
     private readonly Lazy<AuthData> _data;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AuthInfo"/> class.
+    /// </summary>
+    /// <param name="httpContextAccessor">The HTTP context accessor.</param>
     public AuthInfo(IHttpContextAccessor httpContextAccessor)
     {
         this._data = new Lazy<AuthData>(() =>
