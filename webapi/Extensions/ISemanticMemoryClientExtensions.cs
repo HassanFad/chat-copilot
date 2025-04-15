@@ -21,6 +21,9 @@ namespace CopilotChat.WebApi.Extensions;
 /// </summary>
 internal static class ISemanticMemoryClientExtensions
 {
+    /// <summary>
+    /// List of pipeline steps used in the document upload process.
+    /// </summary>
     private static readonly List<string> pipelineSteps = new() { "extract", "partition", "gen_embeddings", "save_embeddings" };
 
     /// <summary>
@@ -62,6 +65,9 @@ internal static class ISemanticMemoryClientExtensions
         appBuilder.Services.AddSingleton(memory);
     }
 
+    /// <summary>
+    /// Search memory asynchronously with various parameters.
+    /// </summary>
     public static Task<SearchResult> SearchMemoryAsync(
         this IKernelMemory memoryClient,
         string indexName,
@@ -74,6 +80,9 @@ internal static class ISemanticMemoryClientExtensions
         return memoryClient.SearchMemoryAsync(indexName, query, relevanceThreshold, resultCount: -1, chatId, memoryName, cancellationToken);
     }
 
+    /// <summary>
+    /// Search memory asynchronously with various parameters.
+    /// </summary>
     public static async Task<SearchResult> SearchMemoryAsync(
         this IKernelMemory memoryClient,
         string indexName,
@@ -106,6 +115,9 @@ internal static class ISemanticMemoryClientExtensions
         return searchResult;
     }
 
+    /// <summary>
+    /// Store documents asynchronously.
+    /// </summary>
     public static async Task StoreDocumentAsync(
         this IKernelMemory memoryClient,
         string indexName,
@@ -131,6 +143,9 @@ internal static class ISemanticMemoryClientExtensions
         await memoryClient.ImportDocumentAsync(uploadRequest, cancellationToken);
     }
 
+    /// <summary>
+    /// Store memories asynchronously.
+    /// </summary>
     public static Task StoreMemoryAsync(
         this IKernelMemory memoryClient,
         string indexName,
@@ -142,6 +157,9 @@ internal static class ISemanticMemoryClientExtensions
         return memoryClient.StoreMemoryAsync(indexName, chatId, memoryName, memoryId: Guid.NewGuid().ToString(), memory, cancellationToken);
     }
 
+    /// <summary>
+    /// Store memories asynchronously.
+    /// </summary>
     public static async Task StoreMemoryAsync(
         this IKernelMemory memoryClient,
         string indexName,
@@ -176,6 +194,9 @@ internal static class ISemanticMemoryClientExtensions
         await memoryClient.ImportDocumentAsync(uploadRequest, cancellationToken);
     }
 
+    /// <summary>
+    /// Remove chat memories asynchronously.
+    /// </summary>
     public static async Task RemoveChatMemoriesAsync(
         this IKernelMemory memoryClient,
         string indexName,
