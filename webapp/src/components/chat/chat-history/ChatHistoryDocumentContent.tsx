@@ -1,5 +1,3 @@
-// Copyright (c) Microsoft. All rights reserved.
-
 import {
     Caption1,
     Card,
@@ -115,3 +113,31 @@ export const ChatHistoryDocumentContent: React.FC<ChatHistoryDocumentContentProp
         </>
     );
 };
+
+export function getFileIconByFileExtension(fileName: string, props: FluentIconsProps = {}) {
+    const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.') + 1);
+    switch (extension) {
+        case 'pdf':
+            return <DocumentPdfRegular {...props} />;
+        case 'txt':
+            return <DocumentTextRegular {...props} />;
+        case 'docx':
+            return <DocumentWordRegular {...props} />;
+        case 'md':
+            return <DocumentMarkdownRegular {...props} />;
+        case 'jpg':
+        case 'jpeg':
+            return <DocumentJpgRegular {...props} />;
+        case 'png':
+            return <DocumentPngRegular {...props} />;
+        case 'tif':
+        case 'tiff':
+            return <DocumentTiffRegular {...props} />;
+        case 'bmp':
+            return <DocumentBmpRegular {...props} />;
+        case 'gif':
+            return <DocumentGifRegular {...props} />;
+        default:
+            return <DocumentTextRegular {...props} />;
+    }
+}
