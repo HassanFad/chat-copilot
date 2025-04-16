@@ -1,5 +1,3 @@
-// Copyright (c) Microsoft. All rights reserved.
-
 import {
     Button,
     Label,
@@ -34,6 +32,13 @@ import {
     DocumentArrowUp20Regular,
     DocumentPdfRegular,
     DocumentTextRegular,
+    DocumentWordRegular,
+    DocumentMarkdownRegular,
+    DocumentJpgRegular,
+    DocumentPngRegular,
+    DocumentTiffRegular,
+    DocumentBmpRegular,
+    DocumentGifRegular,
     FluentIconsProps,
     GlobeAdd20Regular,
 } from '@fluentui/react-icons';
@@ -389,8 +394,28 @@ function getAccessString(chatId: string) {
 
 export function getFileIconByFileExtension(fileName: string, props: FluentIconsProps = {}) {
     const extension = fileName.toLowerCase().substring(fileName.lastIndexOf('.') + 1);
-    if (extension === 'pdf') {
-        return <DocumentPdfRegular {...props} />;
+    switch (extension) {
+        case 'pdf':
+            return <DocumentPdfRegular {...props} />;
+        case 'txt':
+            return <DocumentTextRegular {...props} />;
+        case 'docx':
+            return <DocumentWordRegular {...props} />;
+        case 'md':
+            return <DocumentMarkdownRegular {...props} />;
+        case 'jpg':
+        case 'jpeg':
+            return <DocumentJpgRegular {...props} />;
+        case 'png':
+            return <DocumentPngRegular {...props} />;
+        case 'tif':
+        case 'tiff':
+            return <DocumentTiffRegular {...props} />;
+        case 'bmp':
+            return <DocumentBmpRegular {...props} />;
+        case 'gif':
+            return <DocumentGifRegular {...props} />;
+        default:
+            return <DocumentTextRegular {...props} />;
     }
-    return <DocumentTextRegular {...props} />;
 }
