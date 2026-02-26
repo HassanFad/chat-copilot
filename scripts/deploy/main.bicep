@@ -81,6 +81,9 @@ param deployWebSearcherPlugin bool = false
 @description('Whether to deploy pre-built binary packages to the cloud')
 param deployPackages bool = true
 
+@description('Whether to deploy Azure Key Vault for secret management')
+param deployKeyVault bool = true
+
 @description('Region for the resources')
 param location string = resourceGroup().location
 
@@ -92,6 +95,9 @@ var uniqueName = '${name}-${rgIdHash}'
 
 @description('Name of the Azure Storage file share to create')
 var storageFileShareName = 'aciqdrantshare'
+
+@description('Name of the Key Vault resource')
+var keyVaultName = 'kv-${take(uniqueName, 21)}'
 
 resource openAI 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (deployNewAzureOpenAI) {
   name: 'ai-${uniqueName}'
@@ -151,6 +157,9 @@ resource appServiceWeb 'Microsoft.Web/sites@2022-09-01' = {
   name: 'app-${uniqueName}-webapi'
   location: location
   kind: 'app'
+  identity: {
+    type: 'SystemAssigned'
+  }
   tags: {
     skweb: '1'
   }
@@ -169,6 +178,11 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
   name: 'web'
   dependsOn: [
     webSubnetConnection
+    keyVaultSecretAiApiKey
+    keyVaultSecretStorageConnectionString
+    keyVaultSecretCosmosConnectionString
+    keyVaultSecretSpeechKey
+    keyVaultSecretCogSearchKey
   ]
   properties: {
     alwaysOn: false
@@ -236,7 +250,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'ChatStore:Cosmos:ConnectionString'
-          value: deployCosmosDB ? cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString : ''
+          value: deployCosmosDB ? (deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cosmosConnectionString)' : cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString) : ''
         }
         {
           name: 'AzureSpeech:Region'
@@ -244,7 +258,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'AzureSpeech:Key'
-          value: deploySpeechServices ? speechAccount.listKeys().key1 : ''
+          value: deploySpeechServices ? (deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=speechKey)' : speechAccount.listKeys().key1) : ''
         }
         {
           name: 'AllowedOrigins'
@@ -328,7 +342,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:AzureBlobs:ConnectionString'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+          value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=storageConnectionString)' : 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
         }
         {
           name: 'KernelMemory:Services:AzureBlobs:Container'
@@ -340,7 +354,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:AzureQueue:ConnectionString'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+          value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=storageConnectionString)' : 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
         }
         {
           name: 'KernelMemory:Services:AzureCognitiveSearch:Auth'
@@ -352,7 +366,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:AzureCognitiveSearch:APIKey'
-          value: memoryStore == 'AzureCognitiveSearch' ? azureCognitiveSearch.listAdminKeys().primaryKey : ''
+          value: memoryStore == 'AzureCognitiveSearch' ? (deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cognitiveSearchKey)' : azureCognitiveSearch.listAdminKeys().primaryKey) : ''
         }
         {
           name: 'KernelMemory:Services:Qdrant:Endpoint'
@@ -368,7 +382,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:AzureOpenAIText:APIKey'
-          value: deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey
+          value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : (deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey)
         }
         {
           name: 'KernelMemory:Services:AzureOpenAIText:Deployment'
@@ -384,7 +398,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:AzureOpenAIEmbedding:APIKey'
-          value: deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey
+          value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : (deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey)
         }
         {
           name: 'KernelMemory:Services:AzureOpenAIEmbedding:Deployment'
@@ -400,7 +414,7 @@ resource appServiceWebConfig 'Microsoft.Web/sites/config@2022-09-01' = {
         }
         {
           name: 'KernelMemory:Services:OpenAI:APIKey'
-          value: aiApiKey
+          value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : aiApiKey
         }
         {
           name: 'Plugins:0:Name'
@@ -445,6 +459,9 @@ resource appServiceMemoryPipeline 'Microsoft.Web/sites@2022-09-01' = {
   name: 'app-${uniqueName}-memorypipeline'
   location: location
   kind: 'app'
+  identity: {
+    type: 'SystemAssigned'
+  }
   tags: {
     skweb: '1'
   }
@@ -513,7 +530,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureBlobs:ConnectionString'
-        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=storageConnectionString)' : 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
       }
       {
         name: 'KernelMemory:Services:AzureBlobs:Container'
@@ -525,7 +542,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureQueue:ConnectionString'
-        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=storageConnectionString)' : 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
       }
       {
         name: 'KernelMemory:Services:AzureCognitiveSearch:Auth'
@@ -537,7 +554,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureCognitiveSearch:APIKey'
-        value: memoryStore == 'AzureCognitiveSearch' ? azureCognitiveSearch.listAdminKeys().primaryKey : ''
+        value: memoryStore == 'AzureCognitiveSearch' ? (deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=cognitiveSearchKey)' : azureCognitiveSearch.listAdminKeys().primaryKey) : ''
       }
       {
         name: 'KernelMemory:Services:Qdrant:Endpoint'
@@ -553,7 +570,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureOpenAIText:APIKey'
-        value: deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : (deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey)
       }
       {
         name: 'KernelMemory:Services:AzureOpenAIText:Deployment'
@@ -569,7 +586,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureOpenAIEmbedding:APIKey'
-        value: deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : (deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey)
       }
       {
         name: 'KernelMemory:Services:AzureOpenAIEmbedding:Deployment'
@@ -585,7 +602,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:AzureFormRecognizer:APIKey'
-        value: ocrAccount.listKeys().key1
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=ocrApiKey)' : ocrAccount.listKeys().key1
       }
       {
         name: 'KernelMemory:Services:OpenAI:TextModel'
@@ -597,7 +614,7 @@ resource appServiceMemoryPipelineConfig 'Microsoft.Web/sites/config@2022-09-01' 
       }
       {
         name: 'KernelMemory:Services:OpenAI:APIKey'
-        value: aiApiKey
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=aiApiKey)' : aiApiKey
       }
       {
         name: 'Logging:LogLevel:Default'
@@ -635,6 +652,9 @@ resource functionAppWebSearcherPlugin 'Microsoft.Web/sites@2022-09-01' = if (dep
   name: 'function-${uniqueName}-websearcher-plugin'
   location: location
   kind: 'functionapp'
+  identity: {
+    type: 'SystemAssigned'
+  }
   tags: {
     skweb: '1'
   }
@@ -663,7 +683,7 @@ resource functionAppWebSearcherPluginConfig 'Microsoft.Web/sites/config@2022-09-
       }
       {
         name: 'AzureWebJobsStorage'
-        value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+        value: deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=storageConnectionString)' : 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
       }
       {
         name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -671,7 +691,7 @@ resource functionAppWebSearcherPluginConfig 'Microsoft.Web/sites/config@2022-09-
       }
       {
         name: 'PluginConfig:BingApiKey'
-        value: (deployWebSearcherPlugin) ? bingSearchService.listKeys().key1 : ''
+        value: (deployWebSearcherPlugin) ? (deployKeyVault ? '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=bingApiKey)' : bingSearchService.listKeys().key1) : ''
       }
     ]
   }
@@ -755,6 +775,109 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
     resource share 'shares' = {
       name: storageFileShareName
     }
+  }
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = if (deployKeyVault) {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: subscription().tenantId
+    accessPolicies: concat([
+      {
+        tenantId: subscription().tenantId
+        objectId: appServiceWeb.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: appServiceMemoryPipeline.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+    ], deployWebSearcherPlugin ? [
+      {
+        tenantId: subscription().tenantId
+        objectId: functionAppWebSearcherPlugin.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'list'
+          ]
+        }
+      }
+    ] : [])
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+  }
+}
+
+resource keyVaultSecretAiApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault) {
+  parent: keyVault
+  name: 'aiApiKey'
+  properties: {
+    value: deployNewAzureOpenAI ? openAI.listKeys().key1 : aiApiKey
+  }
+}
+
+resource keyVaultSecretStorageConnectionString 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault) {
+  parent: keyVault
+  name: 'storageConnectionString'
+  properties: {
+    value: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};AccountKey=${storage.listKeys().keys[1].value}'
+  }
+}
+
+resource keyVaultSecretCosmosConnectionString 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault && deployCosmosDB) {
+  parent: keyVault
+  name: 'cosmosConnectionString'
+  properties: {
+    value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
+  }
+}
+
+resource keyVaultSecretSpeechKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault && deploySpeechServices) {
+  parent: keyVault
+  name: 'speechKey'
+  properties: {
+    value: speechAccount.listKeys().key1
+  }
+}
+
+resource keyVaultSecretCogSearchKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault && memoryStore == 'AzureCognitiveSearch') {
+  parent: keyVault
+  name: 'cognitiveSearchKey'
+  properties: {
+    value: azureCognitiveSearch.listAdminKeys().primaryKey
+  }
+}
+
+resource keyVaultSecretOcrApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault) {
+  parent: keyVault
+  name: 'ocrApiKey'
+  properties: {
+    value: ocrAccount.listKeys().key1
+  }
+}
+
+resource keyVaultSecretBingApiKey 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = if (deployKeyVault && deployWebSearcherPlugin) {
+  parent: keyVault
+  name: 'bingApiKey'
+  properties: {
+    value: bingSearchService.listKeys().key1
   }
 }
 
@@ -1149,6 +1272,7 @@ resource bingSearchService 'Microsoft.Bing/accounts@2020-06-10' = if (deployWebS
 output webapiUrl string = appServiceWeb.properties.defaultHostName
 output webapiName string = appServiceWeb.name
 output memoryPipelineName string = appServiceMemoryPipeline.name
+output keyVaultName string = deployKeyVault ? keyVault.name : ''
 output pluginNames array = concat(
   [],
   (deployWebSearcherPlugin) ? [ functionAppWebSearcherPlugin.name ] : []
