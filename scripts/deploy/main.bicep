@@ -12,6 +12,18 @@ param name string = 'copichat'
 @allowed([ 'B1', 'S1', 'S2', 'S3', 'P1V3', 'P2V3', 'I1V2', 'I2V2' ])
 param webAppServiceSku string = 'B1'
 
+@description('Minimum number of instances for autoscaling the web app (requires S1 or higher SKU; must be <= autoscaleDefaultCapacity and autoscaleMaxCapacity)')
+@minValue(1)
+param autoscaleMinCapacity int = 1
+
+@description('Maximum number of instances for autoscaling the web app (requires S1 or higher SKU; must be >= autoscaleDefaultCapacity and autoscaleMinCapacity)')
+@minValue(1)
+param autoscaleMaxCapacity int = 10
+
+@description('Default number of instances for autoscaling the web app (requires S1 or higher SKU; must be between autoscaleMinCapacity and autoscaleMaxCapacity inclusive)')
+@minValue(1)
+param autoscaleDefaultCapacity int = 1
+
 @description('Location of package to deploy as the web service')
 #disable-next-line no-hardcoded-env-urls
 param webApiPackageUri string = 'https://aka.ms/copilotchat/webapi/latest'
@@ -92,6 +104,9 @@ var uniqueName = '${name}-${rgIdHash}'
 
 @description('Name of the Azure Storage file share to create')
 var storageFileShareName = 'aciqdrantshare'
+
+@description('Whether the selected App Service SKU supports autoscaling (B1 does not support autoscaling)')
+var supportsAutoscale = webAppServiceSku != 'B1'
 
 resource openAI 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (deployNewAzureOpenAI) {
   name: 'ai-${uniqueName}'
@@ -439,6 +454,89 @@ resource appServiceWebDeploy 'Microsoft.Web/sites/extensions@2022-09-01' = if (d
   dependsOn: [
     appServiceWebConfig
   ]
+}
+
+resource appServiceWebLogs 'Microsoft.Web/sites/config@2022-09-01' = {
+  parent: appServiceWeb
+  name: 'logs'
+  properties: {
+    applicationLogs: {
+      fileSystem: {
+        level: 'Warning'
+      }
+    }
+    httpLogs: {
+      fileSystem: {
+        retentionInMb: 35
+        retentionInDays: 7
+        enabled: true
+      }
+    }
+    detailedErrorMessages: {
+      enabled: true
+    }
+    failedRequestsTracing: {
+      enabled: true
+    }
+  }
+}
+
+resource webAppScaleSettings 'Microsoft.Insights/autoscalesettings@2022-10-01' = if (supportsAutoscale) {
+  name: 'autoscale-${uniqueName}-webapi'
+  location: location
+  properties: {
+    name: 'autoscale-${uniqueName}-webapi'
+    targetResourceUri: appServicePlan.id
+    enabled: true
+    profiles: [
+      {
+        name: 'defaultProfile'
+        capacity: {
+          minimum: string(autoscaleMinCapacity)
+          maximum: string(autoscaleMaxCapacity)
+          default: string(autoscaleDefaultCapacity)
+        }
+        rules: [
+          {
+            metricTrigger: {
+              metricName: 'CpuPercentage'
+              metricResourceUri: appServicePlan.id
+              timeGrain: 'PT1M'
+              statistic: 'Average'
+              timeWindow: 'PT10M'
+              timeAggregation: 'Average'
+              operator: 'GreaterThan'
+              threshold: 70
+            }
+            scaleAction: {
+              direction: 'Increase'
+              type: 'ChangeCount'
+              value: '1'
+              cooldown: 'PT10M'
+            }
+          }
+          {
+            metricTrigger: {
+              metricName: 'CpuPercentage'
+              metricResourceUri: appServicePlan.id
+              timeGrain: 'PT1M'
+              statistic: 'Average'
+              timeWindow: 'PT10M'
+              timeAggregation: 'Average'
+              operator: 'LessThan'
+              threshold: 25
+            }
+            scaleAction: {
+              direction: 'Decrease'
+              type: 'ChangeCount'
+              value: '1'
+              cooldown: 'PT10M'
+            }
+          }
+        ]
+      }
+    ]
+  }
 }
 
 resource appServiceMemoryPipeline 'Microsoft.Web/sites@2022-09-01' = {

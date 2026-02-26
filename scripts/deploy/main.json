@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.23.1.45101",
-      "templateHash": "10280441124249350356"
+      "version": "0.40.2.10011",
+      "templateHash": "9213277674196715151"
     }
   },
   "parameters": {
@@ -31,6 +31,30 @@
       ],
       "metadata": {
         "description": "SKU for the Azure App Service plan"
+      }
+    },
+    "autoscaleMinCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Minimum number of instances for autoscaling the web app (requires S1 or higher SKU; must be <= autoscaleDefaultCapacity and autoscaleMaxCapacity)"
+      }
+    },
+    "autoscaleMaxCapacity": {
+      "type": "int",
+      "defaultValue": 10,
+      "minValue": 1,
+      "metadata": {
+        "description": "Maximum number of instances for autoscaling the web app (requires S1 or higher SKU; must be >= autoscaleDefaultCapacity and autoscaleMinCapacity)"
+      }
+    },
+    "autoscaleDefaultCapacity": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Default number of instances for autoscaling the web app (requires S1 or higher SKU; must be between autoscaleMinCapacity and autoscaleMaxCapacity inclusive)"
       }
     },
     "webApiPackageUri": {
@@ -181,7 +205,8 @@
   "variables": {
     "rgIdHash": "[uniqueString(resourceGroup().id)]",
     "uniqueName": "[format('{0}-{1}', parameters('name'), variables('rgIdHash'))]",
-    "storageFileShareName": "aciqdrantshare"
+    "storageFileShareName": "aciqdrantshare",
+    "supportsAutoscale": "[not(equals(parameters('webAppServiceSku'), 'B1'))]"
   },
   "resources": [
     {
@@ -333,6 +358,97 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/sites', format('app-{0}-webapi', variables('uniqueName')))]",
         "[resourceId('Microsoft.Web/sites/config', format('app-{0}-webapi', variables('uniqueName')), 'web')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}', format('app-{0}-webapi', variables('uniqueName')), 'logs')]",
+      "properties": {
+        "applicationLogs": {
+          "fileSystem": {
+            "level": "Warning"
+          }
+        },
+        "httpLogs": {
+          "fileSystem": {
+            "retentionInMb": 35,
+            "retentionInDays": 7,
+            "enabled": true
+          }
+        },
+        "detailedErrorMessages": {
+          "enabled": true
+        },
+        "failedRequestsTracing": {
+          "enabled": true
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', format('app-{0}-webapi', variables('uniqueName')))]"
+      ]
+    },
+    {
+      "condition": "[variables('supportsAutoscale')]",
+      "type": "Microsoft.Insights/autoscalesettings",
+      "apiVersion": "2022-10-01",
+      "name": "[format('autoscale-{0}-webapi', variables('uniqueName'))]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "name": "[format('autoscale-{0}-webapi', variables('uniqueName'))]",
+        "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}-webapi', variables('uniqueName')))]",
+        "enabled": true,
+        "profiles": [
+          {
+            "name": "defaultProfile",
+            "capacity": {
+              "minimum": "[string(parameters('autoscaleMinCapacity'))]",
+              "maximum": "[string(parameters('autoscaleMaxCapacity'))]",
+              "default": "[string(parameters('autoscaleDefaultCapacity'))]"
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}-webapi', variables('uniqueName')))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT10M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 70
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT10M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}-webapi', variables('uniqueName')))]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT10M",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 25
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": "1",
+                  "cooldown": "PT10M"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', format('asp-{0}-webapi', variables('uniqueName')))]"
       ]
     },
     {
